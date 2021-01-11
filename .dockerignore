@@ -1,0 +1,22 @@
+coverage/*
+!coverage/.resultset.json
+
+.irb_history
+
+# Recursively ignore config files
+/**/config/secrets.y*ml
+
+# Ignore bundler config
+.bundle
+
+# MacOS file
+.DS_store
+
+# database
+*.db
+
+# hide the cache folder
+_cache/
+
+#hidden files
+.*
