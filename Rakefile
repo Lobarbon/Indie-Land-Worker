@@ -3,20 +3,9 @@
 require 'rake/testtask'
 
 CODE = 'app/'
-
-task :default do
-  puts `rake -T`
-end
-
-desc 'run console'
-task :console do
-  sh 'irb -r ./init.rb'
-end
-
-desc 'run api'
-task :api do
-  sh 'ruby script/api_script.rb'
-end
+USERNAME = 'soumyaray'
+IMAGE = 'ruby-http'
+VERSION = '2.7.2'
 
 desc 'Run unit and integration tests'
 Rake::TestTask.new(:spec) do |t|
@@ -27,37 +16,6 @@ end
 desc 'Keep rerunning tests upon changes'
 task :respec do
   sh "rerun -c 'rake spec' --ignore 'coverage/*'"
-end
-
-desc 'Keep restarting web app upon changes'
-task :rerack do
-  sh "rerun -c 'puma config.ru -p 9090' --ignore 'coverage/*'"
-end
-
-desc 'run api'
-task :up do
-  sh 'puma config.ru -p 9090'
-end
-
-desc 'run api in test mode'
-task :test do
-  sh 'RACK_ENV=test puma config.ru -p 9090'
-end
-
-# NOTE: run `rake run:test` in another process
-desc 'Run acceptance tests'
-Rake::TestTask.new(:spec_accept) do |t|
-  t.pattern = 'spec/tests_acceptance/*_acceptance.rb'
-  t.warning = false
-end
-
-namespace :vcr do
-  desc 'clean cassette fixtures'
-  task :clean do
-    sh 'rm spec/fixtures/cassettes/*.yml' do |ok, _|
-      puts(ok ? 'Directory Cassettes is clean' : 'No file found in Cassettes')
-    end
-  end
 end
 
 namespace :check do
@@ -88,93 +46,79 @@ namespace :check do
   end
 end
 
-namespace :run do
-  task :dev do
-    sh 'rerun -c "puma config.ru -p 9090"'
-  end
+# desc 'Build Docker image'
+# task :worker do
+#   require_relative './init'
+#   IndieLand::MsgWorker.new.call
+# end
 
-  task :test do
-    sh 'RACK_ENV=test puma config.ru -p 9090'
+namespace :worker do
+  namespace :run do
+    desc 'Run the background message worker in development mode'
+    task dev: :config do
+      sh 'RACK_ENV=development bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken_dev.yml'
+    end
+
+    desc 'Run the background message worker in testing mode'
+    task test: :config do
+      sh 'RACK_ENV=test bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken_test.yml'
+    end
+
+    desc 'Run the background message worker in production mode'
+    task production: :config do
+      sh 'RACK_ENV=production bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken.yml'
+    end
   end
 end
 
-# rubocop:disable Metrics/BlockLength
-namespace :db do
-  task :config do
-    require 'sequel'
-    require_relative 'config/environment'
-
-    @app = IndieLand::App
+# Docker tasks
+namespace :docker do
+  desc 'Build Docker image'
+  task :build do
+    puts "\nBUILDING WORKER IMAGE"
+    sh "docker build --force-rm -t #{USERNAME}/#{IMAGE}:#{VERSION} ."
   end
 
-  desc 'Run migrations'
-  task migrate: :config do
-    Sequel.extension :migration
-    puts "Migrating #{@app.environment} database to latest"
-    Sequel::Migrator.run(@app.db, 'app/infrastructure/database/migrations')
+  desc 'Run the local Docker container as a worker'
+  task :run do
+    env = ENV['WORKER_ENV'] || 'development'
+
+    puts "\nRUNNING WORKER WITH LOCAL CONTEXT"
+    puts " Running in #{env} mode"
+
+    sh 'docker run -e WORKER_ENV -v $(pwd)/config:/worker/config --rm -it ' \
+       "#{USERNAME}/#{IMAGE}:#{VERSION}"
   end
 
-  desc 'Wipe records from all tables'
-  task wipe: :config do
-    require_relative 'spec/helpers/database_helper'
-    DatabaseHelper.setup_database_cleaner
-    DatabaseHelper.wipe_database
+  desc 'Remove exited containers'
+  task :rm do
+    sh 'docker rm -v $(docker ps -a -q -f status=exited)'
   end
 
-  desc 'Delete dev or test database file'
-  task drop: :config do
-    if @app.environment == :production
-      puts 'Cannot remove production database!'
-      return
-    end
-    FileUtils.rm(@app.config.DB_FILENAME)
-    puts "Deleted #{@app.config.DB_FILENAME}"
+  desc 'List all containers, running and exited'
+  task :ps do
+    sh 'docker ps -a'
   end
+
+  # desc 'Push Docker image to Docker Hub'
+  # task :push do
+  #   puts "\nPUSHING IMAGE TO DOCKER HUB"
+  #   sh "docker push #{USERNAME}/#{IMAGE}:#{VERSION}"
+  # end
 end
-# rubocop:enable Metrics/BlockLength
 
-# rubocop:disable Metrics/BlockLength
-namespace :cache do
-  task :config do
-    require_relative 'config/environment'
-    require_relative 'app/infrastructure/cache/init'
-    @app = IndieLand::App
+# Heroku container registry tasks
+namespace :heroku do
+  desc 'Build and Push Docker image to Heroku Container Registry'
+  task :push do
+    puts "\nBUILDING + PUSHING IMAGE TO HEROKU"
+    sh 'heroku container:push worker'
   end
 
-  namespace :list do
-    desc 'Directory listing of local dev cache'
-    task :dev do
-      puts 'Lists development cache'
-      list = `ls _cache`
-      puts 'No local cache found' if list.empty?
-      puts list
-    end
-
-    desc 'Lists production cache'
-    task production: :config do
-      puts 'Finding production cache'
-      keys = IndieLand::Cache::Client.new(@app.config).keys
-      puts 'No keys found' if keys.none?
-      keys.each { |key| puts "Key: #{key}" }
-    end
-  end
-
-  namespace :wipe do
-    desc 'Delete development cache'
-    task :dev do
-      puts 'Deleting development cache'
-      sh 'rm -rf _cache/*'
-    end
-
-    desc 'Delete production cache'
-    task production: :config do
-      print 'Are you sure you wish to wipe the production cache? (y/n) '
-      if $stdin.gets.chomp.downcase == 'y'
-        puts 'Deleting production cache'
-        wiped = IndieLand::Cache::Client.new(@app.config).wipe
-        wiped.each_key { |key| puts "Wiped: #{key}" }
-      end
-    end
+  desc 'Run worker on Heroku'
+  task :run do
+    puts "\nRUNNING CONTAINER ON HEROKU"
+    sh 'heroku run rake worker'
   end
 end
 
@@ -228,37 +172,8 @@ namespace :queues do
   end
 end
 
-namespace :worker do
-  namespace :run do
-    desc 'Run the background message worker in development mode'
-    task dev: :config do
-      sh 'RACK_ENV=development bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken_dev.yml'
-    end
-
-    desc 'Run the background message worker in testing mode'
-    task test: :config do
-      sh 'RACK_ENV=test bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken_test.yml'
-    end
-
-    desc 'Run the background message worker in production mode'
-    task production: :config do
-      sh 'RACK_ENV=production bundle exec shoryuken -r ./workers/msg_worker.rb -C ./workers/shoryuken.yml'
-    end
-  end
-end
-
 desc 'Run application console (irb)'
 task :console do
   sh 'irb -r ./init'
 end
-
-namespace :vcr do
-  desc 'delete cassette fixtures'
-  task :wipe do
-    sh 'rm spec/fixtures/cassettes/*.yml' do |ok, _|
-      puts(ok ? 'Cassettes deleted' : 'No cassettes found')
-    end
-  end
-end
-
 # rubocop:enable Metrics/BlockLength

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-%w[utils config app]
-  .each do |folder|
-  require_relative "#{folder}/init"
-end
+require 'ostruct'
+
+%w[config worker]
+  .reduce([]) { |files, folder| files << Dir.glob("#{folder}/**/*.rb") }
+  .flatten
+  .sort
+  .each { |file| require_relative file }
