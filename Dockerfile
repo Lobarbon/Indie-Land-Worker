@@ -19,7 +19,8 @@ WORKDIR /worker
 # Copy all allowed files/folders to image
 COPY / .
 
-RUN bundle install
+RUN apk add postgresql-client postgresql-dev \
+&& bundle install
 
 # Default command to run
 CMD rake worker:run:production

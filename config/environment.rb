@@ -12,7 +12,7 @@ module IndieLand
     Econfig.root = File.expand_path('..', File.dirname(__FILE__))
 
     
-    # ENV['DATABASE_URL'] = "sqlite://#{config.DB_FILENAME}"
+    ENV['DATABASE_URL'] = ENV['DATABASE_URL'] || "sqlite://#{config.DB_FILENAME}"
     # puts ENV['DATABASE_URL']
     
     require 'sequel'

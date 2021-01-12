@@ -3,9 +3,16 @@
 🍺 Indie-Land is a gorgeous place to discover Taiwan Indie Music activities immediately by just browsing our website. 
 
 # I am worker!!
-How to run on heroku:
+How to run on docker:
+    `rake docker:build`
+    `rake docker:run`
+
+Setup heroku:
     `heroku git:remote -a indie-land-worker`
     `heroku container:login`
+
+Run on heroku:
+    `rake docker:build`
     `heroku container:push web`
     `heroku container:release web`
     `heroku run worker:run:production`

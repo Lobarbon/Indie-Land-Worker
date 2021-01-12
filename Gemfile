@@ -21,6 +21,7 @@ gem 'http', '~>4.0'
 
 # Object-Relational Mapping
 gem 'sequel', '~>5.38' # ORM lib
+gem 'pg', '~> 1.2.3'
 
 # gem 'sqlite3', '~> 1.4'
 
