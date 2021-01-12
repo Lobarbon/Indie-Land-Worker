@@ -2,7 +2,7 @@
 
 require 'ostruct'
 
-%w[config worker]
+%w[config workers]
   .reduce([]) { |files, folder| files << Dir.glob("#{folder}/**/*.rb") }
   .flatten
   .sort

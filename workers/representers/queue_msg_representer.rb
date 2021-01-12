@@ -19,6 +19,7 @@ module IndieLand
       private
 
       def event_id
+        puts represented.event_id 
         represented.event_id
       end
 

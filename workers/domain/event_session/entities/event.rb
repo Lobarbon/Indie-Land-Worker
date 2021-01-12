@@ -3,6 +3,8 @@
 require 'dry-types'
 require 'dry-struct'
 
+require_relative 'session'
+
 module IndieLand
   module Entity
     # Domain entity for an Event

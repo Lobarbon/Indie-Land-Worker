@@ -46,6 +46,7 @@ namespace :check do
   end
 end
 
+
 # desc 'Build Docker image'
 # task :worker do
 #   require_relative './init'

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-folders = %w[event_session user]
+folders = %w[orms]
 folders.each do |folder|
   require_relative "#{folder}/init.rb"
 end
