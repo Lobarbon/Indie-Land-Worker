@@ -4,26 +4,26 @@
 
 # I am worker!!
 
-This worker can only run on heroku. The database for written is same as the database on [heroku].
+This worker can only run on heroku. The database for written is same as the database on  [heroku](https://indie-land-api.herokuapp.com/).
 
 How to run a docker:
-    ```
-    rake docker:build
-    rake docker:run
+    ```bash=
+    $ rake docker:build
+    $ rake docker:run
     ```
 
 Setup heroku:
+
     ```
     heroku git:remote -a indie-land-worker
     heroku container:login
     ```
 
 Run on heroku:
+
     ```
     rake docker:build
     heroku container:push web
     heroku container:release web
     heroku run rake worker:run:production
     ```
-
-[heroku]: (https://indie-land-api.herokuapp.com/)
