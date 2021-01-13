@@ -3,22 +3,27 @@
 🍺 Indie-Land is a gorgeous place to discover Taiwan Indie Music activities immediately by just browsing our website. 
 
 # I am worker!!
-How to run on docker:
-    `rake docker:build`
-    `rake docker:run`
+
+This worker can only run on heroku. The database for written is same as the database on [heroku].
+
+How to run a docker:
+    ```
+    rake docker:build
+    rake docker:run
+    ```
 
 Setup heroku:
-    `heroku git:remote -a indie-land-worker`
-    `heroku container:login`
+    ```
+    heroku git:remote -a indie-land-worker
+    heroku container:login
+    ```
 
 Run on heroku:
-    `rake docker:build`
-    `heroku container:push web`
-    `heroku container:release web`
-    `heroku run worker:run:production`
+    ```
+    rake docker:build
+    heroku container:push web
+    heroku container:release web
+    heroku run rake worker:run:production
+    ```
 
-[Ruby]: https://www.ruby-lang.org/en/
-[Bootstrap]: https://getbootstrap.com/
-[http://localhost:9292]: http://localhost:9292
-[Indie-Land]: https://github.com/Lobarbon/Indie-Land.git
-[ER-Diagram]: https://github.com/Lobarbon/Indie-Land/blob/database/png/ER_Diagram.png
+[heroku]: (https://indie-land-api.herokuapp.com/)

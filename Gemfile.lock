@@ -81,9 +81,9 @@ GEM
     parser (2.7.2.0)
       ast (~> 2.4.1)
     path_expander (1.1.0)
+    pg (1.2.3)
     psych (3.2.0)
     public_suffix (4.0.6)
-    rack (2.2.3)
     rainbow (2.2.2)
       rake
     rake (13.0.1)
@@ -100,8 +100,6 @@ GEM
     rexml (3.2.4)
     roar (1.1.0)
       representable (~> 3.0.0)
-    roda (3.39.0)
-      rack
     rubocop (1.0.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.5)
@@ -126,7 +124,6 @@ GEM
       docile (~> 1.1)
       simplecov-html (~> 0.11)
     simplecov-html (0.12.3)
-    sqlite3 (1.4.2)
     thor (1.0.1)
     uber (0.1.0)
     unf (0.1.4)
@@ -152,14 +149,13 @@ DEPENDENCIES
   minitest (~> 5.0)
   minitest-rg (~> 5.0)
   multi_json
+  pg (~> 1.2.3)
   reek (~> 6.0)
   roar
-  roda (~> 3.8)
   rubocop (~> 1.0)
   sequel (~> 5.38)
   shoryuken (~> 5)
   simplecov (~> 0)
-  sqlite3 (~> 1.4)
   vcr (~> 6.0)
   webmock (~> 3.0)
 
