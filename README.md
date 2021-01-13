@@ -1,4 +1,3 @@
-![Indie-Land API continuous integration](https://github.com/Lobarbon/Indie-Land-api/workflows/API%20continuous%20integration/badge.svg?branch=master)
 # IndieLand
 🍺 Indie-Land is a gorgeous place to discover Taiwan Indie Music activities immediately by just browsing our website. 
 
