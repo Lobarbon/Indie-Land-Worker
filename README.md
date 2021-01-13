@@ -7,10 +7,10 @@
 This worker can only run on heroku. The database for written is same as the database on  [heroku](https://indie-land-api.herokuapp.com/).
 
 How to run a docker:
-    ```bash=
-    $ rake docker:build
-    $ rake docker:run
-    ```
+```bash=
+$ rake docker:build
+$ rake docker:run
+```
 
 Setup heroku:
 
